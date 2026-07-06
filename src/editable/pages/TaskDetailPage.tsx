@@ -8,6 +8,7 @@ import type { SitePost } from '@/lib/site-connector'
 import { EditableSiteShell } from '@/editable/shell/EditableSiteShell'
 import { EditableArticleComments } from '@/editable/components/EditableArticleComments'
 import { getTaskTheme, taskThemeStyle } from '@/editable/theme/task-themes'
+import { Ads } from '@/lib/ads'
 
 export const revalidate = 3
 
@@ -113,10 +114,22 @@ const mapSrcFor = (post: SitePost) => {
   return ''
 }
 
+const detailTopAdSlot = (task: TaskKey) => task === 'listing' ? 'in-feed' : 'header'
+const detailBottomAdSlot = (task: TaskKey) => task === 'listing' ? 'sidebar' : 'article-bottom'
+
+function DetailAd({ slot, eager = false }: { slot: string; eager?: boolean }) {
+  return (
+    <div className="mx-auto max-w-6xl px-4 py-6">
+      <Ads slot={slot} showLabel eager={eager} className="mx-auto w-full" />
+    </div>
+  )
+}
+
 export function TaskDetailView({ task, post, related, comments = [] }: { task: TaskKey; post: SitePost; related: SitePost[]; comments?: Array<{ id: string; name: string; comment: string; createdAt: string }> }) {
   return (
     <EditableSiteShell>
       <main style={taskThemeStyle(task)} className="min-h-screen bg-[var(--tk-bg)] text-[var(--tk-text)]">
+        <DetailAd slot={detailTopAdSlot(task)} eager />
         {task === 'listing' ? <ListingDetail post={post} related={related} /> : null}
         {task === 'classified' ? <ClassifiedDetail post={post} related={related} /> : null}
         {task === 'image' ? <ImageDetail post={post} related={related} /> : null}
@@ -124,6 +137,7 @@ export function TaskDetailView({ task, post, related, comments = [] }: { task: T
         {task === 'pdf' ? <PdfDetail post={post} related={related} /> : null}
         {task === 'profile' ? <ProfileDetail post={post} related={related} /> : null}
         {task === 'article' ? <ArticleDetail post={post} related={related} comments={comments} /> : null}
+        <DetailAd slot={detailBottomAdSlot(task)} />
       </main>
     </EditableSiteShell>
   )
@@ -183,7 +197,7 @@ function Kicker({ task, children }: { task: TaskKey; children: React.ReactNode }
 function BackLink({ task }: { task: TaskKey }) {
   const taskConfig = getTaskConfig(task)
   return (
-    <Link href={taskConfig?.route || '/'} className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--tk-muted)] transition hover:text-[var(--tk-text)]">
+    <Link href={taskConfig?.route || '/'} className="inline-flex items-center gap-1.5 rounded-full border-2 border-black bg-white px-4 py-2 text-sm font-black text-[var(--tk-text)] shadow-[3px_3px_0_var(--tk-line)] transition hover:bg-[var(--tk-accent-soft)]">
       <ArrowLeft className="h-4 w-4" /> Back to {taskConfig?.label || 'posts'}
     </Link>
   )
@@ -195,13 +209,12 @@ function ArticleDetail({ post, related, comments }: { post: SitePost; related: S
   return (
     <>
       <article className="mx-auto max-w-4xl px-6 py-14 sm:py-20">
-        <BackLink task="article" />
         <p className="mt-10 text-xs font-medium uppercase tracking-[0.28em] text-[var(--tk-accent)]">{categoryOf(post, 'Article')}</p>
         <h1 className="editable-display mt-5 text-balance text-4xl font-semibold leading-[1.06] tracking-[-0.03em] sm:text-5xl lg:text-[3.4rem]">{post.title}</h1>
         <div className="mt-6 text-sm text-[var(--tk-muted)]">
           <span>{SITE_CONFIG.name}</span>
         </div>
-        {images[0] ? <img src={images[0]} alt="" className="mt-10 aspect-[16/9] w-full rounded-[var(--tk-radius)] border border-[var(--tk-line)] object-cover" /> : null}
+        {images[0] ? <img src={images[0]} alt="" className="mt-10 aspect-[16/9] w-full rounded-[var(--tk-radius)] border-2 border-[var(--tk-line)] object-cover shadow-[8px_8px_0_var(--tk-line)]" /> : null}
         <BodyContent post={post} />
         <EditableArticleComments slug={post.slug} comments={comments} />
       </article>
@@ -225,7 +238,7 @@ function ListingDetail({ post, related }: { post: SitePost; related: SitePost[] 
       <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_380px]">
         <article className="min-w-0">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
-            <div className="flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-[var(--tk-radius)] border border-[var(--tk-line)] bg-[var(--tk-raised)]">
+            <div className="flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-[var(--tk-radius)] border-2 border-[var(--tk-line)] bg-[var(--tk-raised)] shadow-[5px_5px_0_var(--tk-line)]">
               {logo ? <img src={logo} alt="" className="h-full w-full object-cover" /> : <Building2 className="h-12 w-12 text-[var(--tk-muted)]" />}
             </div>
             <div className="min-w-0">
@@ -264,7 +277,7 @@ function ClassifiedDetail({ post, related }: { post: SitePost; related: SitePost
       <section className="mx-auto grid max-w-[var(--editable-container)] gap-10 px-6 py-14 sm:py-20 lg:grid-cols-[360px_minmax(0,1fr)] lg:px-8">
         <aside className="lg:sticky lg:top-24 lg:self-start">
           <BackLink task="classified" />
-          <div className="mt-7 rounded-[var(--tk-radius)] border border-[var(--tk-line)] bg-[var(--tk-surface)] p-7 shadow-[0_22px_60px_rgba(15,23,42,0.08)]">
+          <div className="mt-7 rounded-[var(--tk-radius)] border-2 border-[var(--tk-line)] bg-[var(--tk-surface)] p-7 shadow-[7px_7px_0_var(--tk-line)]">
             <Kicker task="classified">Classified</Kicker>
             <h1 className="editable-display mt-4 text-2xl font-semibold leading-tight tracking-[-0.02em]">{post.title}</h1>
             <DetailMeta post={post} category={getField(post, ['category'])} />
@@ -274,8 +287,8 @@ function ClassifiedDetail({ post, related }: { post: SitePost; related: SitePost
               {location ? <BadgeLine label="Location" value={location} /> : null}
             </div>
             <div className="mt-7 flex flex-wrap gap-3">
-              {phone ? <a href={`tel:${phone}`} className="inline-flex items-center gap-2 rounded-full bg-[var(--tk-accent)] px-5 py-2.5 text-sm font-semibold text-[var(--tk-on-accent)] transition hover:opacity-90"><Phone className="h-4 w-4" /> Call now</a> : null}
-              {email ? <a href={`mailto:${email}`} className="inline-flex items-center gap-2 rounded-full border border-[var(--tk-line)] px-5 py-2.5 text-sm font-semibold transition hover:border-[var(--tk-accent)]"><Mail className="h-4 w-4" /> Email</a> : null}
+              {phone ? <a href={`tel:${phone}`} className="inline-flex items-center gap-2 rounded-full border-2 border-black bg-black px-5 py-2.5 text-sm font-black text-white transition hover:bg-[var(--tk-accent)] hover:text-black"><Phone className="h-4 w-4" /> Call now</a> : null}
+              {email ? <a href={`mailto:${email}`} className="inline-flex items-center gap-2 rounded-full border-2 border-[var(--tk-line)] bg-white px-5 py-2.5 text-sm font-black transition hover:bg-[var(--tk-accent-soft)]"><Mail className="h-4 w-4" /> Email</a> : null}
             </div>
           </div>
         </aside>
@@ -395,8 +408,8 @@ function ProfileDetail({ post, related }: { post: SitePost; related: SitePost[] 
         <BackLink task="profile" />
         <div className="mt-8 grid gap-10 lg:grid-cols-[360px_minmax(0,1fr)]">
           <aside className="lg:sticky lg:top-24 lg:self-start">
-            <div className="rounded-[var(--tk-radius)] border border-[var(--tk-line)] bg-[var(--tk-surface)] p-8 text-center shadow-[0_22px_60px_rgba(15,23,42,0.08)]">
-              <div className="mx-auto flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border border-[var(--tk-line)] bg-[var(--tk-raised)]">
+          <div className="rounded-[var(--tk-radius)] border-2 border-[var(--tk-line)] bg-[var(--tk-surface)] p-8 text-center shadow-[7px_7px_0_var(--tk-line)]">
+              <div className="mx-auto flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-2 border-[var(--tk-line)] bg-[var(--tk-raised)]">
                 {images[0] ? <img src={images[0]} alt="" className="h-full w-full object-cover" /> : <UserRound className="h-14 w-14 text-[var(--tk-muted)]" />}
               </div>
               <h1 className="editable-display mt-6 text-2xl font-semibold tracking-[-0.02em]">{post.title}</h1>
@@ -419,7 +432,7 @@ function ProfileDetail({ post, related }: { post: SitePost; related: SitePost[] 
 
 // ----- Shared building blocks -----
 function Divider() {
-  return <div className="my-10 h-px bg-[var(--tk-line)]" />
+  return <div className="my-10 h-0.5 bg-[var(--tk-line)]" />
 }
 
 function BodyContent({ post, compact = false }: { post: SitePost; compact?: boolean }) {
@@ -437,7 +450,7 @@ function InfoGrid({ items }: { items: Array<[string, string, typeof MapPin]> }) 
   return (
     <div className="mt-8 grid gap-3 sm:grid-cols-2">
       {visible.map(([label, value, Icon]) => (
-        <div key={label} className="rounded-[var(--tk-radius)] border border-[var(--tk-line)] bg-[var(--tk-surface)] p-4">
+        <div key={label} className="rounded-[var(--tk-radius)] border-2 border-[var(--tk-line)] bg-[var(--tk-surface)] p-4 shadow-[4px_4px_0_var(--tk-line)]">
           <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.14em] text-[var(--tk-muted)]"><Icon className="h-4 w-4 text-[var(--tk-accent)]" /> {label}</div>
           <p className="mt-2 break-words text-sm font-medium leading-6">{value}</p>
         </div>
@@ -452,7 +465,7 @@ function ImageStrip({ images, label, large = false }: { images: string[]; label:
     <section className="mt-10">
       <p className="text-xs font-medium uppercase tracking-[0.2em] text-[var(--tk-muted)]">{label}</p>
       <div className={`mt-4 grid gap-3 ${large ? 'sm:grid-cols-2' : 'grid-cols-2 sm:grid-cols-4'}`}>
-        {images.slice(0, large ? 4 : 8).map((image, index) => <img key={`${image}-${index}`} src={image} alt="" className="aspect-[4/3] rounded-[var(--tk-radius)] border border-[var(--tk-line)] object-cover" />)}
+        {images.slice(0, large ? 4 : 8).map((image, index) => <img key={`${image}-${index}`} src={image} alt="" className="aspect-[4/3] rounded-[var(--tk-radius)] border-2 border-[var(--tk-line)] object-cover shadow-[4px_4px_0_var(--tk-line)]" />)}
       </div>
     </section>
   )
@@ -460,7 +473,7 @@ function ImageStrip({ images, label, large = false }: { images: string[]; label:
 
 function MapBox({ src, label }: { src: string; label: string }) {
   return (
-    <div className="overflow-hidden rounded-[var(--tk-radius)] border border-[var(--tk-line)] bg-[var(--tk-surface)]">
+    <div className="overflow-hidden rounded-[var(--tk-radius)] border-2 border-[var(--tk-line)] bg-[var(--tk-surface)] shadow-[6px_6px_0_var(--tk-line)]">
       <div className="flex items-center gap-2 p-4 text-sm font-semibold"><MapPin className="h-4 w-4 text-[var(--tk-accent)]" /> {label || 'Map location'}</div>
       <iframe src={src} title="Map" loading="lazy" className="h-72 w-full border-0" />
     </div>
@@ -471,14 +484,14 @@ function ContactAction({ website, phone, email, bare = false }: { website?: stri
   if (!website && !phone && !email) return null
   const buttons = (
     <div className={`flex flex-wrap gap-2.5 ${bare ? 'justify-center' : ''}`}>
-      {website ? <Link href={website} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-[var(--tk-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--tk-on-accent)] transition hover:opacity-90">Website <ExternalLink className="h-4 w-4" /></Link> : null}
-      {phone ? <a href={`tel:${phone}`} className="inline-flex items-center gap-2 rounded-full border border-[var(--tk-line)] px-4 py-2.5 text-sm font-semibold transition hover:border-[var(--tk-accent)]"><Phone className="h-4 w-4" /> Call</a> : null}
-      {email ? <a href={`mailto:${email}`} className="inline-flex items-center gap-2 rounded-full border border-[var(--tk-line)] px-4 py-2.5 text-sm font-semibold transition hover:border-[var(--tk-accent)]"><Mail className="h-4 w-4" /> Email</a> : null}
+      {website ? <Link href={website} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border-2 border-black bg-black px-4 py-2.5 text-sm font-black text-white transition hover:bg-[var(--tk-accent)] hover:text-black">Website <ExternalLink className="h-4 w-4" /></Link> : null}
+      {phone ? <a href={`tel:${phone}`} className="inline-flex items-center gap-2 rounded-full border-2 border-[var(--tk-line)] bg-white px-4 py-2.5 text-sm font-black transition hover:bg-[var(--tk-accent-soft)]"><Phone className="h-4 w-4" /> Call</a> : null}
+      {email ? <a href={`mailto:${email}`} className="inline-flex items-center gap-2 rounded-full border-2 border-[var(--tk-line)] bg-white px-4 py-2.5 text-sm font-black transition hover:bg-[var(--tk-accent-soft)]"><Mail className="h-4 w-4" /> Email</a> : null}
     </div>
   )
   if (bare) return <div className="mt-6">{buttons}</div>
   return (
-    <div className="rounded-[var(--tk-radius)] border border-[var(--tk-line)] bg-[var(--tk-surface)] p-6">
+    <div className="rounded-[var(--tk-radius)] border-2 border-[var(--tk-line)] bg-[var(--tk-surface)] p-6 shadow-[6px_6px_0_var(--tk-line)]">
       <p className="text-xs font-medium uppercase tracking-[0.2em] text-[var(--tk-muted)]">Quick actions</p>
       <div className="mt-4">{buttons}</div>
     </div>
@@ -487,18 +500,18 @@ function ContactAction({ website, phone, email, bare = false }: { website?: stri
 
 function BadgeLine({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between gap-4 rounded-xl border border-[var(--tk-line)] bg-[var(--tk-raised)] px-4 py-3 text-sm">
+    <div className="flex items-center justify-between gap-4 rounded-xl border-2 border-[var(--tk-line)] bg-[var(--tk-raised)] px-4 py-3 text-sm">
       <span className="font-medium uppercase tracking-[0.12em] text-[var(--tk-muted)]">{label}</span>
       <span className="font-semibold">{value}</span>
     </div>
   )
 }
 
-function RelatedPanel({ task, post, related }: { task: TaskKey; post: SitePost; related: SitePost[] }) {
+function RelatedPanel({ task, post: _post, related }: { task: TaskKey; post: SitePost; related: SitePost[] }) {
   const taskConfig = getTaskConfig(task)
   return (
     <div className="space-y-6">
-      <div className="rounded-[var(--tk-radius)] border border-[var(--tk-line)] bg-[var(--tk-surface)] p-6">
+      <div className="rounded-[var(--tk-radius)] border-2 border-[var(--tk-line)] bg-[var(--tk-surface)] p-6 shadow-[6px_6px_0_var(--tk-line)]">
         <p className="text-xs font-medium uppercase tracking-[0.2em] text-[var(--tk-muted)]">About this post</p>
         <div className="mt-4 grid gap-2.5 text-sm text-[var(--tk-muted)]">
           <p className="inline-flex items-center gap-2"><Tag className="h-4 w-4 text-[var(--tk-accent)]" /> {taskConfig?.label || task}</p>
@@ -506,7 +519,7 @@ function RelatedPanel({ task, post, related }: { task: TaskKey; post: SitePost; 
         </div>
       </div>
       {related.length ? (
-        <div className="rounded-[var(--tk-radius)] border border-[var(--tk-line)] bg-[var(--tk-surface)] p-6">
+        <div className="rounded-[var(--tk-radius)] border-2 border-[var(--tk-line)] bg-[var(--tk-surface)] p-6 shadow-[6px_6px_0_var(--tk-line)]">
           <div className="flex items-center justify-between gap-3">
             <h2 className="editable-display text-lg font-semibold tracking-[-0.02em]">More like this</h2>
             <Link href={taskConfig?.route || '/'} className="text-xs font-medium uppercase tracking-[0.14em] text-[var(--tk-accent)]">View all</Link>
@@ -524,7 +537,7 @@ function RelatedStrip({ task, related }: { task: TaskKey; related: SitePost[] })
   if (!related.length) return null
   const taskConfig = getTaskConfig(task)
   return (
-    <section className="border-t border-[var(--tk-line)]">
+    <section className="border-t-2 border-[var(--tk-line)]">
       <div className="mx-auto max-w-[var(--editable-container)] px-6 py-14 sm:py-16 lg:px-8">
         <div className="flex items-center justify-between">
           <h2 className="editable-display text-2xl font-semibold tracking-[-0.02em]">More {(taskConfig?.label || 'posts').toLowerCase()}</h2>
@@ -546,7 +559,7 @@ function RelatedCard({ task, post, grid = false }: { task: TaskKey; post: SitePo
   const href = `${getTaskConfig(task)?.route || `/${task}`}/${post.slug}`
   if (grid) {
     return (
-      <Link href={href} className="group block overflow-hidden rounded-[var(--tk-radius)] border border-[var(--tk-line)] bg-[var(--tk-surface)] transition duration-300 hover:-translate-y-1">
+      <Link href={href} className="group block overflow-hidden rounded-[var(--tk-radius)] border-2 border-[var(--tk-line)] bg-[var(--tk-surface)] shadow-[5px_5px_0_var(--tk-line)] transition duration-300 hover:-translate-y-1 hover:shadow-[8px_8px_0_var(--tk-accent)]">
         <div className="aspect-[16/10] overflow-hidden bg-[var(--tk-raised)]">
           {image ? <img src={image} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]" /> : <div className="flex h-full items-center justify-center"><FileText className="h-7 w-7 text-[var(--tk-muted)]" /></div>}
         </div>
@@ -558,7 +571,7 @@ function RelatedCard({ task, post, grid = false }: { task: TaskKey; post: SitePo
     )
   }
   return (
-    <Link href={href} className="group flex gap-3 rounded-xl border border-[var(--tk-line)] p-3 transition hover:border-[var(--tk-accent)]">
+    <Link href={href} className="group flex gap-3 rounded-xl border-2 border-[var(--tk-line)] bg-white p-3 transition hover:bg-[var(--tk-accent-soft)]">
       {image && task !== 'sbm' ? <img src={image} alt="" className="h-16 w-16 shrink-0 rounded-lg object-cover" /> : <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-[var(--tk-raised)]"><FileText className="h-5 w-5 text-[var(--tk-muted)]" /></div>}
       <div className="min-w-0">
         <h3 className="line-clamp-2 text-sm font-semibold leading-snug tracking-[-0.01em]">{post.title}</h3>
@@ -567,4 +580,3 @@ function RelatedCard({ task, post, grid = false }: { task: TaskKey; post: SitePo
     </Link>
   )
 }
-

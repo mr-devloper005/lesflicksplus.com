@@ -67,33 +67,33 @@ export function EditableArticleComments({ slug, comments = [] }: { slug: string;
   const all = useMemo(() => [...stored, ...comments], [stored, comments])
 
   return (
-    <section className="mt-14 border-t border-[var(--tk-line)] pt-10">
-      <div className="flex items-center gap-2 text-lg font-semibold">
+    <section className="mt-14 border-t-2 border-[var(--tk-line)] pt-10">
+      <div className="flex items-center gap-2 text-lg font-black">
         <MessageCircle className="h-5 w-5 text-[var(--tk-accent)]" /> Comments
         <span className="text-[var(--tk-muted)]">({all.length})</span>
       </div>
 
-      <form onSubmit={submit} className="mt-6 rounded-[var(--tk-radius)] border border-[var(--tk-line)] bg-[var(--tk-surface)] p-5">
+      <form onSubmit={submit} className="mt-6 rounded-[var(--tk-radius)] border-2 border-[var(--tk-line)] bg-[var(--tk-surface)] p-5 shadow-[6px_6px_0_var(--tk-line)]">
         <input
           value={name}
           onChange={(event) => setName(event.target.value)}
           placeholder="Your name (optional)"
           maxLength={60}
-          className="h-11 w-full rounded-lg border border-[var(--tk-line)] bg-[var(--tk-bg)] px-4 text-sm text-[var(--tk-text)] outline-none transition focus:border-[var(--tk-accent)]"
+          className="h-12 w-full rounded-xl border-2 border-[var(--tk-line)] bg-[var(--tk-bg)] px-4 text-sm font-semibold text-[var(--tk-text)] outline-none transition focus:bg-white focus:shadow-[3px_3px_0_var(--tk-accent)]"
         />
         <textarea
           value={text}
           onChange={(event) => setText(event.target.value)}
-          placeholder="Share your thoughts…"
+          placeholder="Share your thoughts..."
           rows={3}
           maxLength={1500}
-          className="mt-3 w-full resize-y rounded-lg border border-[var(--tk-line)] bg-[var(--tk-bg)] px-4 py-3 text-sm leading-6 text-[var(--tk-text)] outline-none transition focus:border-[var(--tk-accent)]"
+          className="mt-3 w-full resize-y rounded-xl border-2 border-[var(--tk-line)] bg-[var(--tk-bg)] px-4 py-3 text-sm leading-6 text-[var(--tk-text)] outline-none transition focus:bg-white focus:shadow-[3px_3px_0_var(--tk-accent)]"
         />
         <div className="mt-3 flex justify-end">
           <button
             type="submit"
             disabled={!text.trim()}
-            className="inline-flex items-center gap-2 rounded-lg bg-[var(--tk-accent)] px-6 py-2.5 text-sm font-bold text-[var(--tk-on-accent)] transition hover:brightness-95 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-full border-2 border-black bg-black px-6 py-2.5 text-sm font-black text-white transition hover:bg-[var(--tk-accent)] hover:text-black active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Send className="h-4 w-4" /> Post comment
           </button>
@@ -102,9 +102,9 @@ export function EditableArticleComments({ slug, comments = [] }: { slug: string;
 
       <div className="mt-6 grid gap-3">
         {all.map((comment) => (
-          <div key={comment.id} className="rounded-[var(--tk-radius)] border border-[var(--tk-line)] bg-[var(--tk-surface)] p-5">
+          <div key={comment.id} className="rounded-[var(--tk-radius)] border-2 border-[var(--tk-line)] bg-[var(--tk-surface)] p-5 shadow-[4px_4px_0_var(--tk-line)]">
             <div className="flex items-center gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--tk-accent-soft)] text-sm font-bold text-[var(--tk-accent)]">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-black bg-[var(--tk-accent-soft)] text-sm font-black text-black">
                 {initial(comment.name)}
               </span>
               <div className="min-w-0">
