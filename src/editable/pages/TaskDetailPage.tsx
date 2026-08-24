@@ -95,7 +95,11 @@ const formatPlainText = (raw: string) => {
 }
 
 const summaryText = (post: SitePost) => post.summary || asText(getContent(post).description) || asText(getContent(post).excerpt) || ''
-const stripHtml = (value: string) => value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+const decodeEntities = (value: string) => value
+  .replace(/&#x([0-9a-fA-F]+);/gi, (_m, hex: string) => String.fromCharCode(parseInt(hex, 16)))
+  .replace(/&#(\d+);/g, (_m, code: string) => String.fromCharCode(Number(code)))
+  .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&nbsp;/g, ' ')
+const stripHtml = (value: string) => decodeEntities(value.replace(/<[^>]*>/g, ' ')).replace(/\s+/g, ' ').trim()
 // Plain-text lead intro, but only when it isn't just a duplicate of the body
 // (some posts store the full HTML body in `summary`, which would render twice).
 const leadText = (post: SitePost) => {
@@ -210,7 +214,7 @@ function ArticleDetail({ post, related, comments }: { post: SitePost; related: S
     <>
       <article className="mx-auto max-w-4xl px-6 py-14 sm:py-20">
         <p className="mt-10 text-xs font-medium uppercase tracking-[0.28em] text-[var(--tk-accent)]">{categoryOf(post, 'Article')}</p>
-        <h1 className="editable-display mt-5 text-balance text-4xl font-semibold leading-[1.06] tracking-[-0.03em] sm:text-5xl lg:text-[3.4rem]">{post.title}</h1>
+        <h1 className="editable-display mt-5 text-balance text-4xl font-semibold leading-[1.06] tracking-[-0.03em] sm:text-5xl lg:text-[3.4rem]">{decodeEntities(post.title)}</h1>
         <div className="mt-6 text-sm text-[var(--tk-muted)]">
           <span>{SITE_CONFIG.name}</span>
         </div>
@@ -243,7 +247,7 @@ function ListingDetail({ post, related }: { post: SitePost; related: SitePost[] 
             </div>
             <div className="min-w-0">
               <Kicker task="listing">Business listing</Kicker>
-              <h1 className="editable-display mt-4 text-4xl font-semibold leading-[1.04] tracking-[-0.03em] sm:text-5xl">{post.title}</h1>
+              <h1 className="editable-display mt-4 text-4xl font-semibold leading-[1.04] tracking-[-0.03em] sm:text-5xl">{decodeEntities(post.title)}</h1>
               <DetailMeta post={post} category={getField(post, ['category'])} />
             </div>
           </div>
@@ -254,7 +258,7 @@ function ListingDetail({ post, related }: { post: SitePost; related: SitePost[] 
           <ImageStrip images={images.slice(1)} label="Showcase" />
         </article>
         <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
-          {mapSrc ? <MapBox src={mapSrc} label={address || post.title} /> : null}
+          {mapSrc ? <MapBox src={mapSrc} label={address || decodeEntities(post.title)} /> : null}
           <ContactAction website={website} phone={phone} email={email} />
           <RelatedPanel task="listing" post={post} related={related} />
         </aside>
@@ -279,7 +283,7 @@ function ClassifiedDetail({ post, related }: { post: SitePost; related: SitePost
           <BackLink task="classified" />
           <div className="mt-7 rounded-[var(--tk-radius)] border-2 border-[var(--tk-line)] bg-[var(--tk-surface)] p-7 shadow-[7px_7px_0_var(--tk-line)]">
             <Kicker task="classified">Classified</Kicker>
-            <h1 className="editable-display mt-4 text-2xl font-semibold leading-tight tracking-[-0.02em]">{post.title}</h1>
+            <h1 className="editable-display mt-4 text-2xl font-semibold leading-tight tracking-[-0.02em]">{decodeEntities(post.title)}</h1>
             <DetailMeta post={post} category={getField(post, ['category'])} />
             <p className="editable-display mt-6 text-4xl font-semibold tracking-[-0.03em] text-[var(--tk-accent)]">{price || 'Open offer'}</p>
             <div className="mt-6 space-y-2.5">
@@ -321,7 +325,7 @@ function ImageDetail({ post, related }: { post: SitePost; related: SitePost[] })
           </div>
           <aside className="lg:sticky lg:top-24 lg:self-start">
             <div className="inline-flex items-center gap-2 rounded-full border border-[var(--tk-line)] px-3.5 py-1.5 text-xs font-medium text-[var(--tk-muted)]"><Camera className="h-3.5 w-3.5 text-[var(--tk-accent)]" /> Image story</div>
-            <h1 className="editable-display mt-6 text-4xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-5xl">{post.title}</h1>
+            <h1 className="editable-display mt-6 text-4xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-5xl">{decodeEntities(post.title)}</h1>
             {leadText(post) ? <p className="mt-6 text-lg leading-8 text-[var(--tk-muted)]">{leadText(post)}</p> : null}
             <BodyContent post={post} compact />
           </aside>
@@ -341,7 +345,7 @@ function BookmarkDetail({ post, related }: { post: SitePost; related: SitePost[]
         <BackLink task="sbm" />
         <div className="mt-10 flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--tk-accent-soft)] text-[var(--tk-accent)]"><Bookmark className="h-7 w-7" /></div>
         <div className="mt-6"><Kicker task="sbm">Saved resource</Kicker></div>
-        <h1 className="editable-display mt-4 text-4xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-5xl">{post.title}</h1>
+        <h1 className="editable-display mt-4 text-4xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-5xl">{decodeEntities(post.title)}</h1>
         {leadText(post) ? <p className="mt-6 text-lg leading-8 text-[var(--tk-muted)]">{leadText(post)}</p> : null}
         {website ? (
           <Link href={website} target="_blank" rel="noreferrer" className="mt-8 inline-flex items-center gap-2 rounded-full bg-[var(--tk-accent)] px-5 py-3 text-sm font-semibold text-[var(--tk-on-accent)] transition hover:opacity-90">
@@ -367,7 +371,7 @@ function PdfDetail({ post, related }: { post: SitePost; related: SitePost[] }) {
             <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-[var(--tk-radius)] bg-[var(--tk-accent-soft)] text-[var(--tk-accent)]"><FileText className="h-9 w-9" /></div>
             <div className="min-w-0">
               <Kicker task="pdf">{categoryOf(post, 'Document')}</Kicker>
-              <h1 className="editable-display mt-3 text-3xl font-semibold leading-[1.05] tracking-[-0.02em] sm:text-4xl">{post.title}</h1>
+              <h1 className="editable-display mt-3 text-3xl font-semibold leading-[1.05] tracking-[-0.02em] sm:text-4xl">{decodeEntities(post.title)}</h1>
             </div>
           </div>
           <BodyContent post={post} />
@@ -377,7 +381,7 @@ function PdfDetail({ post, related }: { post: SitePost; related: SitePost[] }) {
                 <span className="text-sm font-semibold">Document preview</span>
                 <Link href={fileUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-[var(--tk-accent)] px-4 py-2 text-xs font-semibold text-[var(--tk-on-accent)] transition hover:opacity-90">Download <Download className="h-4 w-4" /></Link>
               </div>
-              <iframe src={`${fileUrl}#toolbar=0&navpanes=0&scrollbar=0`} title={post.title} className="h-[78vh] w-full bg-[var(--tk-raised)]" />
+              <iframe src={`${fileUrl}#toolbar=0&navpanes=0&scrollbar=0`} title={decodeEntities(post.title)} className="h-[78vh] w-full bg-[var(--tk-raised)]" />
             </div>
           ) : null}
         </article>
@@ -412,7 +416,7 @@ function ProfileDetail({ post, related }: { post: SitePost; related: SitePost[] 
               <div className="mx-auto flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-2 border-[var(--tk-line)] bg-[var(--tk-raised)]">
                 {images[0] ? <img src={images[0]} alt="" className="h-full w-full object-cover" /> : <UserRound className="h-14 w-14 text-[var(--tk-muted)]" />}
               </div>
-              <h1 className="editable-display mt-6 text-2xl font-semibold tracking-[-0.02em]">{post.title}</h1>
+              <h1 className="editable-display mt-6 text-2xl font-semibold tracking-[-0.02em]">{decodeEntities(post.title)}</h1>
               {role ? <p className="mt-2 text-xs font-medium uppercase tracking-[0.16em] text-[var(--tk-accent)]">{role}</p> : null}
               <DetailMeta post={post} center />
               <ContactAction website={website} email={email} bare />
@@ -564,7 +568,7 @@ function RelatedCard({ task, post, grid = false }: { task: TaskKey; post: SitePo
           {image ? <img src={image} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]" /> : <div className="flex h-full items-center justify-center"><FileText className="h-7 w-7 text-[var(--tk-muted)]" /></div>}
         </div>
         <div className="p-5">
-          <h3 className="editable-display line-clamp-2 text-base font-semibold leading-snug tracking-[-0.01em]">{post.title}</h3>
+          <h3 className="editable-display line-clamp-2 text-base font-semibold leading-snug tracking-[-0.01em]">{decodeEntities(post.title)}</h3>
           <p className="mt-2 line-clamp-2 text-sm leading-6 text-[var(--tk-muted)]">{stripHtml(summaryText(post))}</p>
         </div>
       </Link>
@@ -574,7 +578,7 @@ function RelatedCard({ task, post, grid = false }: { task: TaskKey; post: SitePo
     <Link href={href} className="group flex gap-3 rounded-xl border-2 border-[var(--tk-line)] bg-white p-3 transition hover:bg-[var(--tk-accent-soft)]">
       {image && task !== 'sbm' ? <img src={image} alt="" className="h-16 w-16 shrink-0 rounded-lg object-cover" /> : <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-[var(--tk-raised)]"><FileText className="h-5 w-5 text-[var(--tk-muted)]" /></div>}
       <div className="min-w-0">
-        <h3 className="line-clamp-2 text-sm font-semibold leading-snug tracking-[-0.01em]">{post.title}</h3>
+        <h3 className="line-clamp-2 text-sm font-semibold leading-snug tracking-[-0.01em]">{decodeEntities(post.title)}</h3>
         <p className="mt-1.5 line-clamp-2 text-xs leading-5 text-[var(--tk-muted)]">{stripHtml(summaryText(post))}</p>
       </div>
     </Link>
